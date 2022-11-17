@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Users = require('../schemas/user')
-const jwt = require("jsonwebtoken");
+
 // const authMiddleware = require("../middlewares/auth_middleware");
 
 
@@ -33,6 +33,25 @@ router.post('/signup', async (req, res) =>{
   res.json({ result : '회원가입에 성공했습니다. ' })
 })
 
+router.post('/checkid', async (req, res) =>{
+  const { nickname } = req.body
+
+  const user = await Users.findOne({ nickname }).exec ();
+
+  if(user){
+    return res.status(400).json({ 
+      result : false, 
+      errorMessage: '이미 사용중인 닉네임입니다. '
+    })
+  }
+  
+  res.json({ 
+    result : true,
+    nickname,
+	  msg : '사용 가능한 닉네임입니다'  
+  })
+
+})
 
 router.post('/login', async (req, res)=>{
   const { nickname, password } = req.body
@@ -50,5 +69,7 @@ router.post('/login', async (req, res)=>{
     token: jwt.sign({ userId: user._id}, "customized-secret-key")
   })
 })
+
+
 
 module.exports = router
